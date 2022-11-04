@@ -4,8 +4,7 @@ import numpy as np
 from lib_detection import load_model, detect_lp, im2single
 import csv
 import uuid
-import argparse
-
+from flask import Flask, render_template, request, send_file
 def read(img_path): 
         # Ham sap xep contour tu trai sang phai
     def sort_contours(cnts):
@@ -42,27 +41,14 @@ def read(img_path):
                 newString += lp[i]
         return newString
 
-    # cap = cv2.VideoCapture("test/test.MOV")
-    # frame_idx = 0
-    # while cap.isOpened():
-    #     sucess, img = cap.read()
-    #     image_np = np.array(img)
-    #     if img is None:
-    #         break
-    # Đường dẫn ảnh
-    # img_path = "test/5.jpg"
-
-        # frame_idx += 1
-        # if not (frame_idx % 10):
     # Load model LP detection
     wpod_net_path = "wpod-net_update1.json"
     wpod_net = load_model(wpod_net_path)
 
         # Đọc file ảnh đầu vào
     Ivehicle = cv2.imread(img_path)
-        # filenname = "saved.jpg"
-        # cv2.imwrite("saved.jpg",img)
-        # Ivehicle = cv2.imread("saved.jpg")
+    
+
     # Kích thước lớn nhất và nhỏ nhất của 1 chiều ảnh
     Dmax = 608
     Dmin = 288
@@ -94,7 +80,6 @@ def read(img_path):
         fil = cv2.bilateralFilter(blur, 11, 17, 17)
 
         # # Ap dung threshold de phan tach so va nen
-        # binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV)[1]
         binary = cv2.adaptiveThreshold(fil, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 6)
         # cv2.imshow("Anh bien so sau threshold", binary)
         # cv2.waitKey()
@@ -159,8 +144,7 @@ def read(img_path):
                             result = chr(result)
 
                         plate_info +=result
-        # cv2.imshow("Cac contour tim duoc", roi)
-        # cv2.waitKey()
+
         # Viet bien so len anh
         cv2.putText(Ivehicle,fine_tune(plate_info),(50, 50), cv2.FONT_HERSHEY_PLAIN, 3.0, (0, 0, 255), lineType=cv2.LINE_AA)
 
@@ -172,9 +156,9 @@ def read(img_path):
                 csv_writer = csv.writer(f,delimiter=',',quotechar='"',quoting=csv.QUOTE_MINIMAL)
                 csv_writer.writerow([img_name,plate_info])
         save_results(plate_info,roi,'detect_results.csv',"detect_img")
-        # return plate_info
         # Hien thi anh
         print("Bien so=", plate_info)
+        cv2.imwrite('saved.jpg', Ivehicle)
         # cv2.imshow("Hinh anh output",Ivehicle)
         # cv2.waitKey()
 
@@ -188,3 +172,26 @@ def read(img_path):
 
     return binary, roi, plate_info
 
+app=Flask(__name__,template_folder='template',static_folder='static')
+app.config["UPLOAD_FOLDER"] = "static"
+@app.route("/", methods=["POST", "GET"])
+def index():
+    if request.method == "GET":
+        return render_template("index.html")
+    else:
+        # lay anh upload
+        img_file = request.files["file"]
+        path_to_save = os.path.join(app.config["UPLOAD_FOLDER"], "in_img.jpg")
+        img_file.save(path_to_save)
+
+        # dua qua model
+        read(path_to_save)
+        
+        # tra ve ket qua
+        return send_file("saved.jpg", mimetype="image/gif")
+        # print()
+
+if __name__ == "__main__":
+    # port = int(os.environ.get('PORT', 5000))
+    # app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(debug=True)
