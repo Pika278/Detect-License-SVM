@@ -1,0 +1,8 @@
+/docker/
+/docs/
+/puppet/
+/tests/
+*.psd
+*.pdf
+/test
+/spec

@@ -2,8 +2,8 @@ import os
 import cv2
 import numpy as np
 from lib_detection import load_model, detect_lp, im2single
-import csv
-import uuid
+# import csv
+# import uuid
 from flask import Flask, render_template, request, send_file
 def read(img_path): 
         # Ham sap xep contour tu trai sang phai
@@ -148,13 +148,13 @@ def read(img_path):
         cv2.putText(Ivehicle,fine_tune(plate_info),(50, 50), cv2.FONT_HERSHEY_PLAIN, 3.0, (0, 0, 255), lineType=cv2.LINE_AA)
 
         #Luu ket qua
-        def save_results(plate_info,region,csv_filename,folder_path):
-            img_name = '{}.jpg'.format(uuid.uuid1())
-            cv2.imwrite(os.path.join(folder_path,img_name),region)
-            with open(csv_filename,mode = 'a',newline='') as f:
-                csv_writer = csv.writer(f,delimiter=',',quotechar='"',quoting=csv.QUOTE_MINIMAL)
-                csv_writer.writerow([img_name,plate_info])
-        save_results(plate_info,roi,'detect_results.csv',"detect_img")
+#         def save_results(plate_info,region,csv_filename,folder_path):
+#             img_name = '{}.jpg'.format(uuid.uuid1())
+#             cv2.imwrite(os.path.join(folder_path,img_name),region)
+#             with open(csv_filename,mode = 'a',newline='') as f:
+#                 csv_writer = csv.writer(f,delimiter=',',quotechar='"',quoting=csv.QUOTE_MINIMAL)
+#                 csv_writer.writerow([img_name,plate_info])
+#         save_results(plate_info,roi,'detect_results.csv',"detect_img")
         # Hien thi anh
         print("Bien so=", plate_info)
         cv2.imwrite('saved.jpg', Ivehicle)
