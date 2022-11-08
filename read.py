@@ -66,7 +66,6 @@ def read(img_path):
     digit_h = 60 # Kich thuoc ki tu
 
     model_svm = cv2.ml.SVM_load('svm.xml')
-
     if (lp_type != 0 and len(LpImg)):
 
         # Chuyen doi anh bien so
